@@ -1,33 +1,39 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
 from pydantic import BaseModel
+from sqlalchemy.orm import Session
+import models
+from database import engine, get_db
+
+models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
-notes = {}
-counter = {"id": 1}
-
-class Note(BaseModel):
+class NoteRequest(BaseModel):
     title: str
     content: str
 
 @app.get("/")
 def home():
-    return {"message": "Notes API is running"}
+    return {"message": "Welcome to the Notes API!"}
 
 @app.post("/notes")
-def create_note(note: Note):
-    note_id = counter["id"]
-    notes[note_id] = {"id": note_id, "title": note.title, "content": note.content}
-    counter["id"] += 1
-    return notes[note_id]
+def create_note(note: NoteRequest, db: Session = Depends(get_db)):
+    new_note = models.Note(title=note.title, content=note.content)
+    db.add(new_note)
+    db.commit()
+    db.refresh(new_note)
+    return new_note
 
 @app.get("/notes")
-def get_notes():
-    return {"notes": list(notes.values())}
+def get_notes(db: Session = Depends(get_db)):
+    notes = db.query(models.Note).all()
+    return {"notes" : notes}
 
 @app.delete("/notes/{note_id}")
-def delete_note(note_id: int):
-    if note_id not in notes:
+def delete_note(note_id: int, db: Session = Depends(get_db)):
+    note = db.query(models.Note).filter(models.Note.id == note_id).first()
+    if note is None:
         raise HTTPException(status_code=404, detail="Note not found")
-    deleted = notes.pop(note_id)
-    return {"deleted": deleted}
+    db.delete(note)
+    db.commit()
+    return {"deleted": note}
