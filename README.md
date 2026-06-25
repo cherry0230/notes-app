@@ -37,3 +37,19 @@ Open localhost:3000 — admin / admin123
 ## Tech Stack
 Python · FastAPI · PostgreSQL · Docker · Kubernetes · 
 Prometheus · Grafana · Helm
+
+
+## Infrastructure as Code (Terraform)
+
+AWS infrastructure provisioned with Terraform:
+- VPC with CIDR 10.0.0.0/16
+- Public subnet in ap-south-1a
+- Security group allowing ports 22 and 8000
+- EC2 t2.micro instance (Ubuntu 22.04)
+
+### Commands
+cd terraform
+terraform init
+terraform plan
+terraform apply -auto-approve
+terraform destroy -auto-approve
