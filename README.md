@@ -222,8 +222,3 @@ terraform destroy -auto-approve
 
 ---
 
-## What's Next
-
-- Week 3: Agentic AI — building a LinkedIn content agent
-- Deploy agent as a production service on AWS
-- Week 4: Interview sprint and job applications
